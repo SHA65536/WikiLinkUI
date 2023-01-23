@@ -1,4 +1,4 @@
-package linkapiui
+package wikilinkui
 
 import "time"
 

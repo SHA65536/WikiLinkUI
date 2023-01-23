@@ -1,4 +1,4 @@
-module github.com/SHA65536/linkapiui
+module github.com/SHA65536/wikilinkui
 
 go 1.19
 

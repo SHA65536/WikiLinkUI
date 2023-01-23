@@ -4,7 +4,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/SHA65536/linkapiui"
+	"github.com/SHA65536/wikilinkui"
 	"github.com/urfave/cli/v2"
 )
 
@@ -24,7 +24,7 @@ func main() {
 			},
 		},
 		Action: func(ctx *cli.Context) error {
-			api, err := linkapiui.MakeUIHandler("heb", "localhost:2048")
+			api, err := wikilinkui.MakeUIHandler("heb", "localhost:2048")
 			if err != nil {
 				return err
 			}
