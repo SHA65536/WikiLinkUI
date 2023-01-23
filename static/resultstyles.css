@@ -1,0 +1,34 @@
+.header {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.card-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+}
+
+.card {
+  border-radius: 10px;
+  border: 1px solid black;
+  padding: 20px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+  width: 300px;
+  text-align: center;
+}
+
+.arrow-down {
+  border-left: 10px solid transparent;
+  border-right: 10px solid transparent;
+  border-top: 20px solid blue;
+  width: 0;
+  height: 0;
+  margin: 0 auto;
+}

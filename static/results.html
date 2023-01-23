@@ -1,0 +1,21 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="resultstyles.css">
+</head>
+
+<body>
+    <div class="header">
+        <h1>ויקישור</h1>
+    </div>
+    <div class="card-container">
+        {{range .ResultTitles}}
+        <div class="arrow-down"></div>
+        <div class="card">
+            <a href="https://he.wikipedia.org/wiki/{{.}}" target="_blank" rel="noopener noreferrer">{{.}}</a>
+        </div>
+        {{end}}
+    </div>
+</body>
+
+</html>

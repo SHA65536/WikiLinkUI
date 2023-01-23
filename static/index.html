@@ -1,0 +1,41 @@
+<html>
+
+<head>
+    <link rel="stylesheet" href="indexstyles.css">
+</head>
+
+<body>
+    <div class="grid-container">
+        <div class="header">
+            <h2>ויקישור</h2>
+            <p>חפשו ערך התחלה וערך יעד, ולאחר מכן לחצו על <b>חיפוש נתיב</b> כדי למצוא את הדרך הקצרה ביותר ביניהם</p>
+            <button onclick="RandomArticle()">
+                <h3>ערך אקראי</h3>
+            </button>
+        </div>
+        <div class="left">
+            <h2>יעד</h2>
+            <form class="search-form" id="left-search-form">
+                <input placeholder="Press Enter to search" type="search" class="search-input" id="left-search-input"
+                    autocomplete="off" />
+            </form>
+            <section class="search-results" id="left-search-results"></section>
+        </div>
+        <div class="right">
+            <h2>התחלה</h2>
+            <form class="search-form" id="right-search-form">
+                <input placeholder="Press Enter to search" type="search" class="search-input" id="right-search-input"
+                    autocomplete="off" />
+            </form>
+            <section class="search-results" id="right-search-results"></section>
+        </div>
+        <div class="bottom">
+            <button onclick="Search()">
+                <h2>חיפוש נתיב</h2>
+            </button>
+        </div>
+    </div>
+</body>
+<script src="main.js"></script>
+
+</html>

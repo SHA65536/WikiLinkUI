@@ -1,0 +1,85 @@
+.header {
+  grid-area: header;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 24px;
+}
+
+.left {
+  grid-area: left;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+}
+
+.right {
+  grid-area: right;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20px;
+}
+
+.bottom {
+  grid-area: bottom;
+}
+
+.grid-container {
+  display: grid;
+  grid-auto-columns: minmax(0, 1fr);
+  grid-auto-flow: column;
+  grid-template-areas:
+    'header header'
+    'left right'
+    'left right'
+    'bottom bottom'
+    'bottom bottom';
+}
+
+.grid-container>div {
+  text-align: center;
+}
+
+.search-input {
+  text-align: center;
+  border-radius: 3px;
+  border: 1px solid black;
+  font-size: 18px;
+}
+
+.search-results {
+  width: 100%;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.result-item {
+  width: 90%;
+  height: 2.5cm;
+  direction: rtl;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.result-title {
+  font-size: 14px;
+  color: blue;
+  padding: 0%;
+  margin: 0%;
+}
+
+.result-snippet {
+  font-size: 15px;
+  color: black;
+}
+
+.result-link {
+  color: #006621;
+  text-decoration: none;
+  display: block;
+  overflow-wrap: break-word;
+}
+
+.selected-button {
+  background-color: gray;
+}
+
+button>* {
+  pointer-events: none;
+}
