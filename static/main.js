@@ -5,7 +5,9 @@ const leftresults = document.getElementById('left-search-results');
 const rightresults = document.getElementById('right-search-results');
 
 const leftsearchform = document.getElementById('left-search-input');
-const rightsearchform = document.getElementById('right-search-input')
+const rightsearchform = document.getElementById('right-search-input');
+
+const searchbutton = document.getElementById('search-button');
 
 const wikiendpointSearch = `/search?q=`;
 const wikiendpointRandom = `/random`;
@@ -16,12 +18,18 @@ var selectedRight = false;
 leftform.addEventListener('submit', (event) => { event.preventDefault() });
 rightform.addEventListener('submit', (event) => { event.preventDefault() });
 
-leftsearchform.addEventListener('change', handleSubmitLeft);
-rightsearchform.addEventListener('change', handleSubmitRight);
+//leftsearchform.addEventListener('change', handleSubmitLeft);
+//rightsearchform.addEventListener('change', handleSubmitRight);
+
+// Handles both search of articles
+async function handleSubmitBoth() {
+    await handleSubmitLeft()
+    await handleSubmitRight()
+    searchbutton.disabled = true;
+}
 
 // Handles search of start article
 async function handleSubmitLeft(event) {
-    event.preventDefault();
     leftresults.innerHTML = '';
     selectedLeft = false;
     const inputVal = document.getElementById('left-search-input').value.trim();
@@ -36,7 +44,6 @@ async function handleSubmitLeft(event) {
 
 // Handles search of end article
 async function handleSubmitRight(event) {
-    event.preventDefault();
     rightresults.innerHTML = '';
     selectedRight = false;
     const inputVal = document.getElementById('right-search-input').value.trim();
@@ -64,7 +71,12 @@ async function handleSelect(event, side) {
         selectedRight = event.target;
         selectedRight.classList.toggle('selected-button');
     }
-    console.log(side, event);
+    if (selectedLeft != false && selectedRight != false) {
+        searchbutton.disabled = false;
+    } else {
+        searchbutton.disabled = true;
+    }
+    // console.log(side, event);
 }
 
 

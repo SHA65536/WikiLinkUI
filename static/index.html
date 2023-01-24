@@ -8,7 +8,14 @@
     <div class="grid-container">
         <div class="header">
             <h2>ויקישור</h2>
-            <p>חפשו ערך התחלה וערך יעד, ולאחר מכן לחצו על <b>חיפוש נתיב</b> כדי למצוא את הדרך הקצרה ביותר ביניהם</p>
+            <p>הכניסו ערך התחלה וערך יעד, ולחצו על <b>חיפוש ערכים</b></p>
+            <p>בחרו יעדים מהרשימה ולחצו על <b>חיפוש נתיב</b> כדי למצוא את הדרך הקצרה ביותר ביניהם</p>
+            <button onclick="handleSubmitBoth()">
+                <h3>חיפוש ערכים</h3>
+            </button>
+            <button onclick="Search()" id="search-button" disabled>
+                <h3>חיפוש נתיב</h3>
+            </button>
             <button onclick="RandomArticle()">
                 <h3>ערך אקראי</h3>
             </button>
@@ -28,11 +35,6 @@
                     autocomplete="off" />
             </form>
             <section class="search-results" id="right-search-results"></section>
-        </div>
-        <div class="bottom">
-            <button onclick="Search()">
-                <h2>חיפוש נתיב</h2>
-            </button>
         </div>
     </div>
 </body>

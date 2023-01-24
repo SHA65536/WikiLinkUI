@@ -16,24 +16,18 @@
   font-size: 20px;
 }
 
-.bottom {
-  grid-area: bottom;
-}
-
 .grid-container {
   display: grid;
   grid-auto-columns: minmax(0, 1fr);
   grid-auto-flow: column;
   grid-template-areas:
     'header header'
-    'left right'
-    'left right'
-    'bottom bottom'
-    'bottom bottom';
+    'left right';
 }
 
 .grid-container>div {
   text-align: center;
+  direction: rtl;
 }
 
 .search-input {
