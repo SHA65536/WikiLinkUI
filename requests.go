@@ -1,6 +1,7 @@
 package wikilinkui
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -11,6 +12,16 @@ const WikiRandomEndpoint = "https://he.wikipedia.org/w/api.php?action=query&gene
 
 func (u *UIHandler) WikiSearch(query string) (*SearchResult, error) {
 	var res = &SearchResult{}
+
+	// Searching for cached result
+	val, err := u.Redis.Get(context.TODO(), url.QueryEscape(query)).Result()
+	if err == nil {
+		// Returning cached result
+		if err := json.Unmarshal([]byte(val), res); err == nil {
+			return res, nil
+		}
+	}
+	// Requesting search from wikipedia if no cache
 	resp, err := u.Client.Get(WikiSearchEndpoint + url.QueryEscape(query))
 	if err != nil {
 		return nil, fmt.Errorf("failed reaching to wikipedia! ")
@@ -20,12 +31,28 @@ func (u *UIHandler) WikiSearch(query string) (*SearchResult, error) {
 	if err := json.NewDecoder(resp.Body).Decode(res); err != nil {
 		return nil, fmt.Errorf("failed decoding response from wikipedia! ")
 	}
+
+	// Updating cache
+	data, _ := json.Marshal(res)
+	u.Redis.Set(context.TODO(), url.QueryEscape(query), data, 0).Err()
 	return res, nil
 }
 
 func (u *UIHandler) PathSearch(src, dst string) (*ResultResponse, error) {
 	var res = &ResultResponse{}
-	resp, err := u.Client.Get(fmt.Sprintf("http://%s/search?start=%s&end=%s", u.LinkAPI, url.QueryEscape(src), url.QueryEscape(dst)))
+	query := fmt.Sprintf("start=%s&end=%s", url.QueryEscape(src), url.QueryEscape(dst))
+
+	// Searching for cached result
+	val, err := u.Redis.Get(context.TODO(), query).Result()
+	if err == nil {
+		// Returning cached result
+		if err := json.Unmarshal([]byte(val), res); err == nil {
+			return res, nil
+		}
+	}
+
+	// Requesting search from linkapi if no cache
+	resp, err := u.Client.Get(fmt.Sprintf("http://%s/search?%s", u.LinkAPI, query))
 	if err != nil {
 		return res, fmt.Errorf("failed getting response from link api! ")
 	}
@@ -34,5 +61,10 @@ func (u *UIHandler) PathSearch(src, dst string) (*ResultResponse, error) {
 	if err := json.NewDecoder(resp.Body).Decode(res); err != nil {
 		return res, fmt.Errorf("failed decoding response from link api! ")
 	}
+
+	// Updating cache
+	data, _ := json.Marshal(res)
+	u.Redis.Set(context.TODO(), query, data, 0).Err()
+
 	return res, nil
 }

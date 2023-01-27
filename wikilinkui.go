@@ -10,6 +10,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
+	"github.com/redis/go-redis/v9"
 )
 
 //go:embed static/indexstyles.css
@@ -30,17 +31,23 @@ var resultshtml string
 type UIHandler struct {
 	Locale      string
 	LinkAPI     string
+	Redis       *redis.Client
 	Client      *http.Client
 	Router      *chi.Mux
 	ResultTempl *template.Template
 }
 
-func MakeUIHandler(locale string, api_url string) (*UIHandler, error) {
+func MakeUIHandler(locale string, api_url string, redis_addr string) (*UIHandler, error) {
 	var ui = &UIHandler{
 		Locale:      locale,
 		LinkAPI:     api_url,
 		Client:      http.DefaultClient,
 		ResultTempl: template.Must(template.New("results").Parse(resultshtml)),
+		Redis: redis.NewClient(&redis.Options{
+			Addr:     redis_addr,
+			Password: "",
+			DB:       0,
+		}),
 	}
 
 	ui.Router = chi.NewRouter()
