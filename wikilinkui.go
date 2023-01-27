@@ -3,19 +3,14 @@ package wikilinkui
 import (
 	_ "embed"
 	"encoding/json"
-	"fmt"
 	"html/template"
 	"net/http"
-	"net/url"
 	"sync"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 )
-
-const WikiSearchEndpoint = `https://he.wikipedia.org/w/api.php?action=query&list=search&srnamespace=0&srlimit=5&prop=info&utf8=&format=json&origin=*&srsearch=`
-const WikiRandomEndpoint = "https://he.wikipedia.org/w/api.php?action=query&generator=random&grnnamespace=0&grnlimit=1&prop=info|extracts&exlimit=1&explaintext=true&exsentences=1&utf8=&format=json&origin=*"
 
 //go:embed static/indexstyles.css
 var indexstyles []byte
@@ -83,7 +78,6 @@ func (u *UIHandler) MainRoute(w http.ResponseWriter, r *http.Request) {
 
 // Search for articles
 func (u *UIHandler) SearchRoute(w http.ResponseWriter, r *http.Request) {
-	var wikires = &SearchResult{}
 	var qres = &SearchResponse{}
 	query := r.URL.Query().Get("q")
 	if query == "" {
@@ -91,16 +85,10 @@ func (u *UIHandler) SearchRoute(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, qres)
 		return
 	}
-	resp, err := u.Client.Get(WikiSearchEndpoint + url.QueryEscape(query))
-	if err != nil {
-		qres.Error = "failed reaching to wikipedia!"
-		render.JSON(w, r, qres)
-		return
-	}
-	defer resp.Body.Close()
 
-	if err := json.NewDecoder(resp.Body).Decode(wikires); err != nil {
-		qres.Error = "failed decoding response from wikipedia!"
+	wikires, err := u.WikiSearch(query)
+	if err != nil {
+		qres.Error = err.Error()
 		render.JSON(w, r, qres)
 		return
 	}
@@ -150,16 +138,9 @@ func (u *UIHandler) ResultRoute(w http.ResponseWriter, r *http.Request) {
 		render.JSON(w, r, res)
 		return
 	}
-	resp, err := u.Client.Get(fmt.Sprintf("http://%s/search?start=%s&end=%s", u.LinkAPI, url.QueryEscape(start), url.QueryEscape(end)))
+	res, err := u.PathSearch(start, end)
 	if err != nil {
-		res.Error = "failed getting response from link api!"
-		render.JSON(w, r, res)
-		return
-	}
-	defer resp.Body.Close()
-
-	if err := json.NewDecoder(resp.Body).Decode(res); err != nil {
-		res.Error = "failed decoding response from link api!"
+		res.Error = err.Error()
 		render.JSON(w, r, res)
 		return
 	}
