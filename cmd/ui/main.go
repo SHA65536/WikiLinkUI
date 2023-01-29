@@ -14,8 +14,8 @@ func main() {
 	var redis string
 
 	app := &cli.App{
-		Name:        "ui",
-		Description: "Serves the linkapi ui",
+		Name:  "ui",
+		Usage: "Serves the WikiLink web ui",
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:        "port",
