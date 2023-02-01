@@ -15,7 +15,8 @@ COMMANDS:
 
 GLOBAL OPTIONS:
    --port value, -p value   Port to listen to (default: "3000")
-   --link value, -l value   Address for LinkAPI (default: "localhost:2048")
+   --api value, -a value    Address for LinkAPI (default: "localhost:2048")
    --redis value, -r value  Address for Redis (default: "localhost:6379")
+   --log value, -l value    Level of log to be shown ("trace", "debug", "info", "warn", "error", "fatal", "panic") (default: "info")
    --help, -h               show help
 ```

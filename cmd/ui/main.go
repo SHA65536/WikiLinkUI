@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/SHA65536/wikilinkui"
+	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v2"
 )
 
@@ -12,6 +13,7 @@ func main() {
 	var port string
 	var linkapi string
 	var redis string
+	var loglevel string
 
 	app := &cli.App{
 		Name:  "ui",
@@ -25,8 +27,8 @@ func main() {
 				Destination: &port,
 			},
 			&cli.StringFlag{
-				Name:        "link",
-				Aliases:     []string{"l"},
+				Name:        "api",
+				Aliases:     []string{"a"},
 				Value:       "localhost:2048",
 				Usage:       "Address for LinkAPI",
 				Destination: &linkapi,
@@ -38,9 +40,24 @@ func main() {
 				Usage:       "Address for Redis",
 				Destination: &redis,
 			},
+			&cli.StringFlag{
+				Name:        "log",
+				Aliases:     []string{"l"},
+				Value:       "info",
+				Usage:       `Level of log to be shown ("trace", "debug", "info", "warn", "error", "fatal", "panic")`,
+				Destination: &loglevel,
+			},
 		},
 		Action: func(ctx *cli.Context) error {
-			api, err := wikilinkui.MakeUIHandler("heb", linkapi, redis)
+			var level, err = zerolog.ParseLevel(loglevel)
+			if err != nil {
+				return err
+			}
+			logf, err := os.OpenFile("linkapi.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+			if err != nil {
+				return err
+			}
+			api, err := wikilinkui.MakeUIHandler("heb", linkapi, redis, level, logf)
 			if err != nil {
 				return err
 			}

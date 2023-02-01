@@ -3,14 +3,18 @@ package wikilinkui
 import (
 	_ "embed"
 	"encoding/json"
+	"fmt"
 	"html/template"
+	"io"
 	"net/http"
+	"os"
 	"sync"
+	"time"
 
 	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/render"
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 //go:embed static/indexstyles.css
@@ -35,9 +39,10 @@ type UIHandler struct {
 	Client      *http.Client
 	Router      *chi.Mux
 	ResultTempl *template.Template
+	Logger      zerolog.Logger
 }
 
-func MakeUIHandler(locale string, api_url string, redis_addr string) (*UIHandler, error) {
+func MakeUIHandler(locale string, api_url string, redis_addr string, logLevel zerolog.Level, writer io.Writer) (*UIHandler, error) {
 	var ui = &UIHandler{
 		Locale:      locale,
 		LinkAPI:     api_url,
@@ -50,8 +55,12 @@ func MakeUIHandler(locale string, api_url string, redis_addr string) (*UIHandler
 		}),
 	}
 
+	// Creating logger
+	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
+	logwriter := io.MultiWriter(os.Stdout, writer)
+	ui.Logger = zerolog.New(logwriter).With().Str("service", "linkui").Timestamp().Logger().Level(logLevel)
+
 	ui.Router = chi.NewRouter()
-	ui.Router.Use(middleware.Logger)
 	// Main route
 	ui.Router.Get("/", ui.MainRoute)
 	// Search route
@@ -71,25 +80,35 @@ func MakeUIHandler(locale string, api_url string, redis_addr string) (*UIHandler
 	ui.Router.Get("/resultstyles.css", func(w http.ResponseWriter, r *http.Request) {
 		w.Write(resultstyles)
 	})
+
+	ui.Logger.Debug().Msg("created router")
+
 	return ui, nil
 }
 
 func (u *UIHandler) Serve(addr string) error {
+	u.Logger.Info().Msgf("serving linkui on %s", addr)
 	return http.ListenAndServe(addr, u.Router)
 }
 
 // Main webpage route
 func (u *UIHandler) MainRoute(w http.ResponseWriter, r *http.Request) {
+	sTime := time.Now()
+	log := u.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "index").Logger()
 	w.Write(indexhtml)
+	ReqLog(log, w, r, sTime, "success", zerolog.InfoLevel)
 }
 
 // Search for articles
 func (u *UIHandler) SearchRoute(w http.ResponseWriter, r *http.Request) {
+	sTime := time.Now()
+	log := u.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "search").Logger()
 	var qres = &SearchResponse{}
 	query := r.URL.Query().Get("q")
 	if query == "" {
 		qres.Error = "must have query parameter!"
 		render.JSON(w, r, qres)
+		ReqLog(log, w, r, sTime, "invalid parameters", zerolog.InfoLevel)
 		return
 	}
 
@@ -97,6 +116,7 @@ func (u *UIHandler) SearchRoute(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		qres.Error = err.Error()
 		render.JSON(w, r, qres)
+		ReqLog(log, w, r, sTime, qres.Error, zerolog.WarnLevel)
 		return
 	}
 
@@ -109,10 +129,14 @@ func (u *UIHandler) SearchRoute(w http.ResponseWriter, r *http.Request) {
 	}
 
 	render.JSON(w, r, qres)
+	ReqLog(log, w, r, sTime, "success", zerolog.InfoLevel)
 }
 
 // Random Articles
 func (u *UIHandler) RandomRoute(w http.ResponseWriter, r *http.Request) {
+	sTime := time.Now()
+	log := u.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "random").Logger()
+
 	var res = &SearchResponse{}
 	var links = make([]SearchArticle, 10)
 	var wg sync.WaitGroup
@@ -132,10 +156,14 @@ func (u *UIHandler) RandomRoute(w http.ResponseWriter, r *http.Request) {
 	res.Result = links
 
 	render.JSON(w, r, res)
+	ReqLog(log, w, r, sTime, "success", zerolog.InfoLevel)
 }
 
 // Results for path
 func (u *UIHandler) ResultRoute(w http.ResponseWriter, r *http.Request) {
+	sTime := time.Now()
+	log := u.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "result").Logger()
+
 	var res = &ResultResponse{}
 	start := r.URL.Query().Get("start")
 	end := r.URL.Query().Get("end")
@@ -143,16 +171,19 @@ func (u *UIHandler) ResultRoute(w http.ResponseWriter, r *http.Request) {
 	if end == "" || start == "" {
 		res.Error = "must have start and end parameters!"
 		render.JSON(w, r, res)
+		ReqLog(log, w, r, sTime, "invalid parameters", zerolog.InfoLevel)
 		return
 	}
 	res, err := u.PathSearch(start, end)
 	if err != nil {
 		res.Error = err.Error()
 		render.JSON(w, r, res)
+		ReqLog(log, w, r, sTime, res.Error, zerolog.WarnLevel)
 		return
 	}
 
 	u.ResultTempl.Execute(w, res)
+	ReqLog(log, w, r, sTime, "success", zerolog.InfoLevel)
 }
 
 func (u *UIHandler) GetRandom(out []SearchArticle, idx int) {
@@ -183,4 +214,12 @@ func (u *UIHandler) GetRandom(out []SearchArticle, idx int) {
 		Snippet: res.Query.Pages[page].Extract,
 		Pageid:  res.Query.Pages[page].Pageid,
 	}
+}
+
+func timeToMs(t time.Duration) string {
+	return fmt.Sprintf("%dms", t/time.Millisecond)
+}
+
+func ReqLog(Logger zerolog.Logger, w http.ResponseWriter, r *http.Request, s time.Time, msg string, level zerolog.Level) {
+	Logger.WithLevel(level).Str("took", timeToMs(time.Since(s))).Msg(msg)
 }
