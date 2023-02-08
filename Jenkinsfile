@@ -19,7 +19,7 @@ pipeline {
         stage('Push') {
             steps {
                 // Push to S3
-                sh "aws s3 cp ./linkapi s3://cloudschoolproject-buildartifacts/ui"
+                sh "aws s3 cp ./ui s3://cloudschoolproject-buildartifacts/ui"
             }
         }
     }
