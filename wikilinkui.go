@@ -69,6 +69,8 @@ func MakeUIHandler(locale string, api_url string, redis_addr string, logLevel ze
 	ui.Router.Get("/random", ui.RandomRoute)
 	// Result route
 	ui.Router.Get("/result", ui.ResultRoute)
+	// Health route
+	ui.Router.Get("/health", ui.HealthRoute)
 
 	// Static files
 	ui.Router.Get("/main.js", func(w http.ResponseWriter, r *http.Request) {
@@ -184,6 +186,11 @@ func (u *UIHandler) ResultRoute(w http.ResponseWriter, r *http.Request) {
 
 	u.ResultTempl.Execute(w, res)
 	ReqLog(log, w, r, sTime, "success", zerolog.InfoLevel)
+}
+
+// HealthRoute for health checking purposes
+func (u *UIHandler) HealthRoute(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("ok"))
 }
 
 func (u *UIHandler) GetRandom(out []SearchArticle, idx int) {
