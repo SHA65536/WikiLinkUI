@@ -7,7 +7,8 @@ pipeline {
         stage('Build') {
             steps {
                 // Build the application
-                sh "go build ./cmd/wikilinkui"
+                sh "mkdir output"
+                sh "go build -o output ./cmd/wikilinkui"
             }
         }
         stage('Test') {
@@ -19,7 +20,7 @@ pipeline {
         stage('Push') {
             steps {
                 // Push to S3
-                sh "aws s3 cp ./ui s3://cloudschoolproject-buildartifacts/wikilinkui_v_$BUILD_NUMBER"
+                sh "aws s3 cp ./output/wikilinkui s3://cloudschoolproject-buildartifacts/wikilinkui_v_$BUILD_NUMBER"
             }
         }
     }
