@@ -7,7 +7,7 @@ pipeline {
         stage('Build') {
             steps {
                 // Build the application
-                sh "mkdir output"
+                sh "mkdir -p output"
                 sh "go build -o output ./cmd/wikilinkui"
             }
         }
