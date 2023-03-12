@@ -89,7 +89,7 @@ func MakeUIHandler(locale string, api_url string, redis_addr string, logLevel ze
 }
 
 func (u *UIHandler) Serve(addr string) error {
-	u.Logger.Info().Msgf("serving linkui on %s", addr)
+	u.Logger.Info().Msgf("serving linkui v2 on %s", addr)
 	return http.ListenAndServe(addr, u.Router)
 }
 
