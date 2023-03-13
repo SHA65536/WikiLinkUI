@@ -1,7 +1,6 @@
 package wikilinkui
 
 import (
-	"context"
 	"encoding/json"
 	"fmt"
 	"net/url"
@@ -14,13 +13,12 @@ func (u *UIHandler) WikiSearch(query string) (*SearchResult, error) {
 	var res = &SearchResult{}
 
 	// Searching for cached result
-	val, err := u.Redis.Get(context.TODO(), url.QueryEscape(query)).Result()
-	if err == nil {
-		// Returning cached result
+	if val, ok := u.Redis.GetValue(url.QueryEscape(query)); ok {
 		if err := json.Unmarshal([]byte(val), res); err == nil {
 			return res, nil
 		}
 	}
+
 	// Requesting search from wikipedia if no cache
 	resp, err := u.Client.Get(WikiSearchEndpoint + url.QueryEscape(query))
 	if err != nil {
@@ -34,7 +32,7 @@ func (u *UIHandler) WikiSearch(query string) (*SearchResult, error) {
 
 	// Updating cache
 	data, _ := json.Marshal(res)
-	u.Redis.Set(context.TODO(), url.QueryEscape(query), data, 0).Err()
+	u.Redis.PutValue(url.QueryEscape(query), string(data))
 	return res, nil
 }
 
@@ -43,8 +41,7 @@ func (u *UIHandler) PathSearch(src, dst string) (*ResultResponse, error) {
 	query := fmt.Sprintf("start=%s&end=%s", url.QueryEscape(src), url.QueryEscape(dst))
 
 	// Searching for cached result
-	val, err := u.Redis.Get(context.TODO(), query).Result()
-	if err == nil {
+	if val, ok := u.Redis.GetValue(query); ok {
 		// Returning cached result
 		if err := json.Unmarshal([]byte(val), res); err == nil {
 			return res, nil
@@ -64,7 +61,7 @@ func (u *UIHandler) PathSearch(src, dst string) (*ResultResponse, error) {
 
 	// Updating cache
 	data, _ := json.Marshal(res)
-	u.Redis.Set(context.TODO(), query, data, 0).Err()
+	u.Redis.PutValue(url.QueryEscape(query), string(data))
 
 	return res, nil
 }

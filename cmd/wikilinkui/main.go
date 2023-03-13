@@ -18,7 +18,15 @@ func main() {
 		// API_ADDR
 		apiAddr string = "localhost:2048"
 		// REDIS_ADDR
-		redis string = "localhost:6379"
+		rAddr string = "localhost:6379"
+		// REDIS_ROLE
+		rRole string = ""
+		// VAULT_ADDR
+		vAddr string = ""
+		// VAULT_REGION
+		vRegion string = ""
+		// VAULT_ROLE
+		vRole string = ""
 		// LOG_LEVEL
 		logLevel string = "info"
 		// LOG_PATH
@@ -49,7 +57,19 @@ func main() {
 				apiAddr = val
 			}
 			if val, ok := os.LookupEnv("REDIS_ADDR"); ok {
-				redis = val
+				rAddr = val
+			}
+			if val, ok := os.LookupEnv("REDIS_ROLE"); ok {
+				rRole = val
+			}
+			if val, ok := os.LookupEnv("VAULT_ADDR"); ok {
+				vAddr = val
+			}
+			if val, ok := os.LookupEnv("VAULT_REGION"); ok {
+				vRegion = val
+			}
+			if val, ok := os.LookupEnv("VAULT_ROLE"); ok {
+				vRole = val
 			}
 			if val, ok := os.LookupEnv("LOG_LEVEL"); ok {
 				logLevel = val
@@ -65,7 +85,7 @@ func main() {
 			if err != nil {
 				return err
 			}
-			api, err := wikilinkui.MakeUIHandler("heb", apiAddr, redis, level, logf)
+			api, err := wikilinkui.MakeUIHandler("heb", apiAddr, rAddr, rRole, vAddr, vRegion, vRole, level, logf)
 			if err != nil {
 				return err
 			}

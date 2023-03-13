@@ -13,7 +13,6 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/render"
-	"github.com/redis/go-redis/v9"
 	"github.com/rs/zerolog"
 )
 
@@ -35,24 +34,25 @@ var resultshtml string
 type UIHandler struct {
 	Locale      string
 	LinkAPI     string
-	Redis       *redis.Client
+	Redis       *RedisHandler
 	Client      *http.Client
 	Router      *chi.Mux
 	ResultTempl *template.Template
 	Logger      zerolog.Logger
 }
 
-func MakeUIHandler(locale string, api_url string, redis_addr string, logLevel zerolog.Level, writer io.Writer) (*UIHandler, error) {
+// ("heb", apiAddr, rAddr, rRole, vAddr, vRegion, vRole, level, logf)
+func MakeUIHandler(locale, apiAddr, rAddr, rRole, vAddr, vRegion, vRole string, logLevel zerolog.Level, writer io.Writer) (*UIHandler, error) {
+	redis, err := MakeRedisHandler(rAddr, rRole, vAddr, vRegion, vRole)
+	if err != nil {
+		return nil, err
+	}
 	var ui = &UIHandler{
 		Locale:      locale,
-		LinkAPI:     api_url,
+		LinkAPI:     apiAddr,
 		Client:      http.DefaultClient,
 		ResultTempl: template.Must(template.New("results").Parse(resultshtml)),
-		Redis: redis.NewClient(&redis.Options{
-			Addr:     redis_addr,
-			Password: "",
-			DB:       0,
-		}),
+		Redis:       redis,
 	}
 
 	// Creating logger
