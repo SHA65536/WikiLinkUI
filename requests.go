@@ -13,7 +13,7 @@ func (u *UIHandler) WikiSearch(query string) (*SearchResult, error) {
 	var res = &SearchResult{}
 
 	// Searching for cached result
-	if val, ok := u.Redis.GetValue(url.QueryEscape(query)); ok {
+	if val, err := u.Redis.GetValue(url.QueryEscape(query)); err == nil {
 		if err := json.Unmarshal([]byte(val), res); err == nil {
 			return res, nil
 		}
@@ -41,7 +41,7 @@ func (u *UIHandler) PathSearch(src, dst string) (*ResultResponse, error) {
 	query := fmt.Sprintf("start=%s&end=%s", url.QueryEscape(src), url.QueryEscape(dst))
 
 	// Searching for cached result
-	if val, ok := u.Redis.GetValue(query); ok {
+	if val, err := u.Redis.GetValue(query); err == nil {
 		// Returning cached result
 		if err := json.Unmarshal([]byte(val), res); err == nil {
 			return res, nil
