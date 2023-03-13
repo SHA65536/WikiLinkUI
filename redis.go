@@ -22,12 +22,12 @@ type RedisHandler struct {
 func MakeRedisHandler(rAddr, rRole, vAddr, vRegion, vRole string) (*RedisHandler, error) {
 	var ctx = context.Background()
 	client, err := vault.NewClient(vault.DefaultConfig())
+	client.SetAddress("http://" + vAddr)
 	if err != nil {
 		return nil, err
 	}
 	awsAuth, err := auth.NewAWSAuth(
 		auth.WithRole(vRole),
-		auth.WithRegion(vRegion),
 	)
 	if err != nil {
 		return nil, err
@@ -39,13 +39,11 @@ func MakeRedisHandler(rAddr, rRole, vAddr, vRegion, vRole string) (*RedisHandler
 	if authInfo == nil {
 		return nil, fmt.Errorf("auth empty")
 	}
-	secret, err := client.KVv2("database/creds/").Get(ctx, rRole)
+	secret, err := client.Logical().Read("database/creds/" + vRole)
 	if err != nil {
 		return nil, err
 	}
-	for _, value := range secret.Data {
-		fmt.Printf("%+v\n", value)
-	}
+	fmt.Printf("%+v", secret)
 	return &RedisHandler{
 		RedisAddress: rAddr,
 		RedisRole:    rRole,
