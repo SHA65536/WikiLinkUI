@@ -8,20 +8,20 @@ import (
 	vault "github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/aws"
 	"github.com/redis/go-redis/v9"
+	"github.com/rs/zerolog"
 )
 
 type RedisHandler struct {
 	RedisAddress string
-	RedisRole    string
 	VaultAddress string
-	VaultRegion  string
 	VaultRole    string
 	VaultClient  *vault.Client
 	RedisClient  *redis.Client
 	RedisTTL     time.Time
+	Logger       zerolog.Logger
 }
 
-func MakeRedisHandler(rAddr, rRole, vAddr, vRegion, vRole string) (*RedisHandler, error) {
+func MakeRedisHandler(rAddr, vAddr, vRole string, logger zerolog.Logger) (*RedisHandler, error) {
 	client, err := vault.NewClient(vault.DefaultConfig())
 	if err != nil {
 		return nil, err
@@ -29,12 +29,11 @@ func MakeRedisHandler(rAddr, rRole, vAddr, vRegion, vRole string) (*RedisHandler
 	client.SetAddress("http://" + vAddr)
 	return &RedisHandler{
 		RedisAddress: rAddr,
-		RedisRole:    rRole,
 		VaultAddress: vAddr,
-		VaultRegion:  vRegion,
 		VaultRole:    vRole,
 		VaultClient:  client,
 		RedisTTL:     time.Now(),
+		Logger:       logger,
 	}, nil
 }
 
@@ -42,20 +41,31 @@ func (r *RedisHandler) GetValue(key string) (string, error) {
 	if time.Now().After(r.RedisTTL) {
 		// Need new redis creds
 		if err := r.getRedisAuth(); err != nil {
+			r.Logger.Debug().Msgf("error getting new creds %v", err)
 			return "", err
 		}
+		r.Logger.Debug().Msg("got new creds")
 	}
-	return r.RedisClient.Get(context.TODO(), key).Result()
+	res, err := r.RedisClient.Get(context.TODO(), key).Result()
+	if err != nil {
+		return "", err
+	}
+	return res, nil
 }
 
 func (r *RedisHandler) PutValue(key, value string) error {
 	if time.Now().After(r.RedisTTL) {
 		// Need new redis creds
 		if err := r.getRedisAuth(); err != nil {
+			r.Logger.Debug().Msgf("error getting new creds %v", err)
 			return err
 		}
+		r.Logger.Debug().Msg("got new creds")
 	}
-	return r.RedisClient.Set(context.TODO(), key, value, 0).Err()
+	if err := r.RedisClient.Set(context.TODO(), key, value, 0).Err(); err != nil {
+		return err
+	}
+	return nil
 }
 
 // getRedisAuth reconnects to the redis server

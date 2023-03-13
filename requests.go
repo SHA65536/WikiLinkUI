@@ -13,10 +13,13 @@ func (u *UIHandler) WikiSearch(query string) (*SearchResult, error) {
 	var res = &SearchResult{}
 
 	// Searching for cached result
-	if val, err := u.Redis.GetValue(url.QueryEscape(query)); err == nil {
+	val, err := u.Redis.GetValue(url.QueryEscape(query))
+	if err == nil {
 		if err := json.Unmarshal([]byte(val), res); err == nil {
 			return res, nil
 		}
+	} else {
+		u.Logger.Debug().Msgf("redis get err: %v", err)
 	}
 
 	// Requesting search from wikipedia if no cache
@@ -32,7 +35,9 @@ func (u *UIHandler) WikiSearch(query string) (*SearchResult, error) {
 
 	// Updating cache
 	data, _ := json.Marshal(res)
-	u.Redis.PutValue(url.QueryEscape(query), string(data))
+	if err := u.Redis.PutValue(url.QueryEscape(query), string(data)); err != nil {
+		u.Logger.Debug().Msgf("redis set err: %v", err)
+	}
 	return res, nil
 }
 
@@ -41,11 +46,14 @@ func (u *UIHandler) PathSearch(src, dst string) (*ResultResponse, error) {
 	query := fmt.Sprintf("start=%s&end=%s", url.QueryEscape(src), url.QueryEscape(dst))
 
 	// Searching for cached result
-	if val, err := u.Redis.GetValue(query); err == nil {
+	val, err := u.Redis.GetValue(query)
+	if err == nil {
 		// Returning cached result
 		if err := json.Unmarshal([]byte(val), res); err == nil {
 			return res, nil
 		}
+	} else {
+		u.Logger.Debug().Msgf("redis get err: %v", err)
 	}
 
 	// Requesting search from linkapi if no cache
@@ -61,7 +69,8 @@ func (u *UIHandler) PathSearch(src, dst string) (*ResultResponse, error) {
 
 	// Updating cache
 	data, _ := json.Marshal(res)
-	u.Redis.PutValue(url.QueryEscape(query), string(data))
-
+	if err := u.Redis.PutValue(url.QueryEscape(query), string(data)); err != nil {
+		u.Logger.Debug().Msgf("redis set err: %v", err)
+	}
 	return res, nil
 }

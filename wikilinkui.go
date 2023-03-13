@@ -42,23 +42,24 @@ type UIHandler struct {
 }
 
 // ("heb", apiAddr, rAddr, rRole, vAddr, vRegion, vRole, level, logf)
-func MakeUIHandler(locale, apiAddr, rAddr, rRole, vAddr, vRegion, vRole string, logLevel zerolog.Level, writer io.Writer) (*UIHandler, error) {
-	redis, err := MakeRedisHandler(rAddr, rRole, vAddr, vRegion, vRole)
-	if err != nil {
-		return nil, err
-	}
+func MakeUIHandler(locale, apiAddr, rAddr, vAddr, vRole string, logLevel zerolog.Level, writer io.Writer) (*UIHandler, error) {
 	var ui = &UIHandler{
 		Locale:      locale,
 		LinkAPI:     apiAddr,
 		Client:      http.DefaultClient,
 		ResultTempl: template.Must(template.New("results").Parse(resultshtml)),
-		Redis:       redis,
 	}
 
 	// Creating logger
 	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
 	logwriter := io.MultiWriter(os.Stdout, writer)
 	ui.Logger = zerolog.New(logwriter).With().Str("service", "linkui").Timestamp().Logger().Level(logLevel)
+
+	redis, err := MakeRedisHandler(rAddr, vAddr, vRole, ui.Logger)
+	if err != nil {
+		return nil, err
+	}
+	ui.Redis = redis
 
 	ui.Router = chi.NewRouter()
 	// Main route
