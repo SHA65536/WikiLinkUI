@@ -46,9 +46,6 @@ func (h *UIHandler) SourceRoute(w http.ResponseWriter, r *http.Request) {
 			res.Error = fmt.Sprintf("No matches found for: %s", srcSearch)
 			ReqLog(log, w, r, sTime, res.Error, zerolog.InfoLevel)
 		}
-	} else {
-		res.Error = "invalid parameters"
-		ReqLog(log, w, r, sTime, res.Error, zerolog.InfoLevel)
 	}
 
 	h.Templates["source"].Execute(w, res)
@@ -96,9 +93,6 @@ func (h *UIHandler) DestRoute(w http.ResponseWriter, r *http.Request) {
 			res.Error = fmt.Sprintf("No matches found for: %s", dstSearch)
 			ReqLog(log, w, r, sTime, res.Error, zerolog.InfoLevel)
 		}
-	} else {
-		res.Error = "invalid parameters"
-		ReqLog(log, w, r, sTime, res.Error, zerolog.InfoLevel)
 	}
 
 	h.Templates["destination"].Execute(w, res)
