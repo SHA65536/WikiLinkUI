@@ -80,7 +80,7 @@ func (h *UIHandler) Path(src, dst string) (*FinalStruct, error) {
 
 	// Updating cache
 	data, _ := json.Marshal(res)
-	if err := h.Redis.PutValue(url.QueryEscape(query), string(data)); err != nil {
+	if err := h.Redis.PutValue(query, string(data)); err != nil {
 		h.Logger.Debug().Msgf("redis set err: %v", err)
 	}
 
