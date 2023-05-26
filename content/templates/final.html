@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "bootstrapHeader" .}}
+    {{template "commonHeader" .}}
+</head>
+
+<body>
+    <h1 class="text-center display-1"><a href="/">ויקישור</a></h1>
+    <br><br><br><br><br>
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="card text-center text-white bg-primary">
+            <h2 class="card-title px-4">הקישור הכי קצר</h2>
+            {{if .Error}}
+            <div class="alert alert-danger" role="alert">
+                {{.Error}}
+            </div>
+            {{else}}
+            <ul class="list-group list-group-flush border border-2 border-white rounded">
+                {{range .ResultTitles}}
+                <a href="https://he.wikipedia.org/wiki/{{.}}" target="_blank" class="list-group-item">{{.}}</a>
+                {{end}}
+            </ul>
+            {{end}}
+            <a class="text-center text-white btn btn-lg bg-success border-dark" href="/">חזרה</a>
+        </div>
+    </div>
+
+    {{template "bootstrapFooter" .}}
+</body>
+
+</html>

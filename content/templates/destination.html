@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    {{template "bootstrapHeader" .}}
+    {{template "commonHeader" .}}
+</head>
+
+<body>
+    <h1 class="text-center display-1"><a href="/">ויקישור</a></h1>
+    <br><br><br><br>
+    <h3 class="text-center">ערך התחלה: {{.SrcFinal}}</h3>
+    <br>
+    <div class="container d-flex justify-content-center align-items-center">
+        <div class="card text-center text-white bg-primary">
+            {{if .Result}}
+            <h2 class="card-title">בחירת ערך יעד</h2>
+            {{else}}
+            <h2 class="card-title">חיפוש ערך יעד</h2>
+            {{end}}
+            <div class="card-body">
+                <form action="">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <button class="btn btn-outline-primary bg-white text-primary"
+                                type="submit"><b>חיפוש</b></button>
+                        </div>
+                        <input type="hidden" name="srcFinal" value="{{ .SrcFinal }}" />
+                        <input dir="rtl" id="dst" name="dstSearch" type="text" class="form-control" placeholder="">
+                    </div>
+                </form>
+                {{if .Error}}
+                <div class="alert alert-danger" role="alert">
+                    {{.Error}}
+                </div>
+                {{else if .Result}}
+                <ul class="list-group list-group-flush border border-2 border-white rounded">
+                    {{range .Result}}
+                    <a class="btn btn-primary" href="/final?src={{$.SrcFinal}}&dst={{.}}" role="button">{{ . }}</a>
+                    {{end}}
+                </ul>
+                {{end}}
+                <a class="text-center text-white btn btn-lg bg-success border-dark" href="/">חזרה</a>
+                <a class="text-center text-white btn btn-lg bg-info border-dark"
+                    href="/dest?srcFinal={{$.SrcFinal}}&random=true">אקראי</a>
+            </div>
+        </div>
+    </div>
+
+    {{template "bootstrapFooter" .}}
+</body>
+
+</html>

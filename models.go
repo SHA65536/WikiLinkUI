@@ -12,7 +12,7 @@ type SearchContinue struct {
 	Sroffset int    `json:"sroffset"`
 	Continue string `json:"continue"`
 }
-type Searchinfo struct {
+type SearchInfo struct {
 	Totalhits int `json:"totalhits"`
 }
 type Search struct {
@@ -25,7 +25,7 @@ type Search struct {
 	Timestamp time.Time `json:"timestamp"`
 }
 type SearchQuery struct {
-	Searchinfo Searchinfo `json:"searchinfo"`
+	SearchInfo SearchInfo `json:"searchinfo"`
 	Search     []Search   `json:"search"`
 }
 
@@ -40,37 +40,10 @@ type RandomContinue struct {
 	Continue    string `json:"continue"`
 }
 type RandomPage struct {
-	Pageid               int       `json:"pageid"`
-	Ns                   int       `json:"ns"`
-	Title                string    `json:"title"`
-	Contentmodel         string    `json:"contentmodel"`
-	Pagelanguage         string    `json:"pagelanguage"`
-	Pagelanguagehtmlcode string    `json:"pagelanguagehtmlcode"`
-	Pagelanguagedir      string    `json:"pagelanguagedir"`
-	Touched              time.Time `json:"touched"`
-	Lastrevid            int       `json:"lastrevid"`
-	Length               int       `json:"length"`
-	Extract              string    `json:"extract"`
+	Pageid int    `json:"pageid"`
+	Ns     int    `json:"ns"`
+	Title  string `json:"title"`
 }
 type RandomQuery struct {
 	Pages map[string]RandomPage `json:"pages"`
-}
-
-// Search Response from the search route
-type SearchResponse struct {
-	Error  string          `json:"error,omitempty"`
-	Result []SearchArticle `json:"result,omitempty"`
-}
-
-type SearchArticle struct {
-	Title   string `json:"title"`
-	Snippet string `json:"snippet"`
-	Pageid  int    `json:"pageid"`
-}
-
-// Result Response from result route
-type ResultResponse struct {
-	Error        string   `json:"error,omitempty"`
-	ResultIds    []uint32 `json:"ids,omitempty"`
-	ResultTitles []string `json:"titles,omitempty"`
 }
