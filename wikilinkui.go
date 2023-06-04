@@ -7,7 +7,6 @@ import (
 	"io"
 	"io/fs"
 	"net/http"
-	"os"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -24,11 +23,12 @@ type UIHandler struct {
 	Client    *http.Client
 	Router    *chi.Mux
 	Templates map[string]*template.Template
-	Logger    zerolog.Logger
+	Logger    *LoggingHandler
 }
 
 // ("heb", apiAddr, rAddr, rRole, vAddr, vRegion, vRole, level, logf)
 func MakeUIHandler(locale, apiAddr, rAddr, vAddr, vRole string, logLevel zerolog.Level, writer io.Writer) (*UIHandler, error) {
+	var err error
 	var ui = &UIHandler{
 		Locale:  locale,
 		LinkAPI: apiAddr,
@@ -52,9 +52,10 @@ func MakeUIHandler(locale, apiAddr, rAddr, vAddr, vRole string, logLevel zerolog
 	}
 
 	// Creating logger
-	zerolog.TimeFieldFormat = zerolog.TimeFormatUnix
-	logwriter := io.MultiWriter(os.Stdout, writer)
-	ui.Logger = zerolog.New(logwriter).With().Str("service", "linkui").Timestamp().Logger().Level(logLevel)
+	ui.Logger, err = MakeLoggingHandler(logLevel, writer)
+	if err != nil {
+		return nil, err
+	}
 
 	// Creating redis handler
 	redis, err := MakeRedisHandler(rAddr, vAddr, vRole, ui.Logger)
@@ -77,13 +78,13 @@ func MakeUIHandler(locale, apiAddr, rAddr, vAddr, vRole string, logLevel zerolog
 	ui.Router.Get("/final", ui.FinalRoute)
 	ui.Router.Get("/health", ui.HealthRoute)
 
-	ui.Logger.Debug().Msg("created router")
+	ui.Logger.Logger.Debug().Msg("created router")
 
 	return ui, nil
 }
 
 func (u *UIHandler) Serve(addr string) error {
-	u.Logger.Info().Msgf("serving linkui v2 on %s", addr)
+	u.Logger.Logger.Info().Msgf("serving linkui v2 on %s", addr)
 	return http.ListenAndServe(addr, u.Router)
 }
 

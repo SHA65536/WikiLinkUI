@@ -8,7 +8,6 @@ import (
 	vault "github.com/hashicorp/vault/api"
 	auth "github.com/hashicorp/vault/api/auth/aws"
 	"github.com/redis/go-redis/v9"
-	"github.com/rs/zerolog"
 )
 
 type RedisHandler struct {
@@ -18,10 +17,10 @@ type RedisHandler struct {
 	VaultClient  *vault.Client
 	RedisClient  *redis.Client
 	RedisTTL     time.Time
-	Logger       zerolog.Logger
+	Logger       *LoggingHandler
 }
 
-func MakeRedisHandler(rAddr, vAddr, vRole string, logger zerolog.Logger) (*RedisHandler, error) {
+func MakeRedisHandler(rAddr, vAddr, vRole string, logger *LoggingHandler) (*RedisHandler, error) {
 	client, err := vault.NewClient(vault.DefaultConfig())
 	if err != nil {
 		return nil, err
@@ -41,10 +40,10 @@ func (r *RedisHandler) GetValue(key string) (string, error) {
 	if time.Now().After(r.RedisTTL) {
 		// Need new redis creds
 		if err := r.getRedisAuth(); err != nil {
-			r.Logger.Debug().Msgf("error getting new creds %v", err)
+			r.Logger.Logger.Debug().Msgf("error getting new creds %v", err)
 			return "", err
 		}
-		r.Logger.Debug().Msg("got new creds")
+		r.Logger.Logger.Debug().Msg("got new creds")
 	}
 	res, err := r.RedisClient.Get(context.TODO(), key).Result()
 	if err != nil {
@@ -57,10 +56,10 @@ func (r *RedisHandler) PutValue(key, value string) error {
 	if time.Now().After(r.RedisTTL) {
 		// Need new redis creds
 		if err := r.getRedisAuth(); err != nil {
-			r.Logger.Debug().Msgf("error getting new creds %v", err)
+			r.Logger.Logger.Debug().Msgf("error getting new creds %v", err)
 			return err
 		}
-		r.Logger.Debug().Msg("got new creds")
+		r.Logger.Logger.Debug().Msg("got new creds")
 	}
 	if err := r.RedisClient.Set(context.TODO(), key, value, 0).Err(); err != nil {
 		return err

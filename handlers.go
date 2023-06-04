@@ -20,7 +20,7 @@ func (h *UIHandler) SourceRoute(w http.ResponseWriter, r *http.Request) {
 
 	// Set up log
 	sTime := time.Now()
-	log := h.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "index").Logger()
+	log := h.Logger.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "index").Logger()
 
 	// Get query params
 	randSearch := r.URL.Query().Get("random")
@@ -66,7 +66,7 @@ func (h *UIHandler) DestRoute(w http.ResponseWriter, r *http.Request) {
 
 	// Set up log
 	sTime := time.Now()
-	log := h.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "dest").Logger()
+	log := h.Logger.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "dest").Logger()
 
 	// Get query params
 	randSearch := r.URL.Query().Get("random")
@@ -114,7 +114,7 @@ func (h *UIHandler) FinalRoute(w http.ResponseWriter, r *http.Request) {
 
 	// Set up log
 	sTime := time.Now()
-	log := h.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "final").Logger()
+	log := h.Logger.Logger.With().Str("ip", r.RemoteAddr).Str("path", r.URL.Path).Str("route", "final").Logger()
 
 	// Get query params
 	src := r.URL.Query().Get("src")

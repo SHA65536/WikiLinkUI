@@ -22,7 +22,7 @@ func (h *UIHandler) Search(query string) ([]string, error) {
 			return titles, nil
 		}
 	} else {
-		h.Logger.Debug().Msgf("redis get err: %v", err)
+		h.Logger.Logger.Debug().Msgf("redis get err: %v", err)
 	}
 
 	// Searching wikipedia
@@ -44,7 +44,7 @@ func (h *UIHandler) Search(query string) ([]string, error) {
 	// Updating cache
 	data, _ := json.Marshal(titles)
 	if err := h.Redis.PutValue(url.QueryEscape(query), string(data)); err != nil {
-		h.Logger.Debug().Msgf("redis set err: %v", err)
+		h.Logger.Logger.Debug().Msgf("redis set err: %v", err)
 	}
 
 	return titles, nil
@@ -64,7 +64,7 @@ func (h *UIHandler) Path(src, dst string) (*FinalStruct, error) {
 			return &res, nil
 		}
 	} else {
-		h.Logger.Debug().Msgf("redis get err: %v", err)
+		h.Logger.Logger.Debug().Msgf("redis get err: %v", err)
 	}
 
 	// Searching LinkAPI
@@ -81,7 +81,7 @@ func (h *UIHandler) Path(src, dst string) (*FinalStruct, error) {
 	// Updating cache
 	data, _ := json.Marshal(res)
 	if err := h.Redis.PutValue(query, string(data)); err != nil {
-		h.Logger.Debug().Msgf("redis set err: %v", err)
+		h.Logger.Logger.Debug().Msgf("redis set err: %v", err)
 	}
 
 	return &res, nil
